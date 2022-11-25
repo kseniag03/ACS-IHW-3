@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <math.h>
 
+double bernoulli[1000];
+
 long long factorial(int n) {
     if (n == 0 || n == 1) {
         return 1;
@@ -10,20 +12,32 @@ long long factorial(int n) {
 
 // n-й член последовательности степенного ряда, Bn -- число Бернулли
 double th(int n, double x) {
-    if (n == 1) {
-        return 1;
+    double res = 0.0;
+    for (int i = 1; i <= n; ++i) {
+        res += pow(2, 2 * i) * (pow(2, 2 * i) - 1) * bernoulli[2 * i]  * pow(x, 2 * i - 1) / factorial(2 * i);
     }
-    return pow(-1, n - 1) * pow(2, 2 * n) * (pow(2, 2 * n) - 1) * Bn(n) * pow(x, 2 * n - 1) / factorial(2 * n);
+    return res;
+}
+
+double calculateTanh(double x) {
+    double tanh = 0.0;
+    tanh = (exp(x) - exp(-x)) / (exp(x) + exp(-x));
+    return tanh;
 }
 
 int main()
 {
-    int n;
-    printf("Введите n: ");
-    scanf("%d", &n);
+    // в описании функции указано, что для большей точности |x| < pi/2
+    double x;
+    printf("Введите x: ");
+    scanf("%lf", &x);
 
+    double eps;
+    printf("Введите eps: ");
+    scanf("%lf", &eps);
 
-    double bernoulli[1000];
+    int n = 10;
+    //double bernoulli[1000];
     bernoulli[0] = 1.0;
     bernoulli[1] = -0.5;
     for (int i = 2; i <= n; ++i) {
@@ -40,20 +54,28 @@ int main()
     }
 
     // b12 -- точность теряется, b16 -- сильно теряется, b18 -- переполнение,
-    // т.е. для суммы степенного ряда берём первые 12 членов
+    // т.е. для суммы степенного ряда с меньшей погрешностью берём первые 10 членов
     for (int i = 0; i <= n; ++i) {
         printf("b%d = %lf\n", i, bernoulli[i]);
     }
+    printf("\n");
 
     int a = 1;
-    // exact_ans -- ответ с формулы
-    // my_ans -- ответ с разложения в степенной ряд
-    while(abs(exact_ans - my_ans) < eps / 100)
-    {
-        // ...
-        a++;
-    }
+    double res;
+    double exact = calculateTanh(x);
+    do {
+        if (a >= 11) {
+            break;
+        }
+        res = th(a, x);
+        printf("!!!!! %lf\n", res);
+        ++a;
+    } while (fabs(res - exact) > eps / 100);
 
+    printf("Точное значение: %lf\n", exact);
+    printf("Приближённое значение: %lf\n", res);
+    printf("Количество итераций: %d\n", a);
+    printf("Погрешность: %lf\n", fabs(res - exact));
 
     return 0;
 }
