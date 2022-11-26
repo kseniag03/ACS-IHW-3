@@ -279,14 +279,14 @@ ________________________
 
 ### 7. Тексты программы на языке ассемблера, разработанной вручную или полученной после компиляции и расширенной комментариями. <br> ###
 
-Можно также посмотреть здесь: ACS-IHW-3/codes/edited-asm-code <br>
+Можно посмотреть здесь: ACS-IHW-3/codes/edited-asm-code <br> [ACS-IHW-3/codes/edited-asm-code](https://github.com/kseniag03/ACS-IHW-3/tree/main/codes/edited-asm-code) <br>
 
-[main](https://github.com/kseniag03/ACS-IHW-2/blob/main/codes/edited-asm-code/main.s) <br>
-[file_input](https://github.com/kseniag03/ACS-IHW-2/blob/main/codes/edited-asm-code/file_input.s) <br>
-[file_output](https://github.com/kseniag03/ACS-IHW-2/blob/main/codes/edited-asm-code/file_output.s) <br>
-[random_generation](https://github.com/kseniag03/ACS-IHW-2/blob/main/codes/edited-asm-code/random_generation.s) <br>
-[timespec_difference](https://github.com/kseniag03/ACS-IHW-2/blob/main/codes/edited-asm-code/timespec_difference.s) <br>
-[form_new_str](https://github.com/kseniag03/ACS-IHW-2/blob/main/codes/edited-asm-code/form_new_str.s) <br>
+[main](https://github.com/kseniag03/ACS-IHW-3/blob/main/codes/edited-asm-code/main.s) <br>
+[file_input](https://github.com/kseniag03/ACS-IHW-3/blob/main/codes/edited-asm-code/file_input.s) <br>
+[file_output](https://github.com/kseniag03/ACS-IHW-3/blob/main/codes/edited-asm-code/file_output.s) <br>
+[random_generation](https://github.com/kseniag03/ACS-IHW-3/blob/main/codes/edited-asm-code/random_generation.s) <br>
+[timespec_difference](https://github.com/kseniag03/ACS-IHW-3/blob/main/codes/edited-asm-code/timespec_difference.s) <br>
+[power_series](https://github.com/kseniag03/ACS-IHW-3/blob/main/codes/edited-asm-code/power_series.s) <br>
 
 main.s
 
