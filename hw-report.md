@@ -51,112 +51,151 @@ main.c -- основная функция
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 extern int64_t timespec_difference(struct timespec a, struct timespec b);
-extern int file_input(char *pStr,  char *filename);
-extern void file_output(char *pStr,  char *filename);
-extern void random_generation(char *pStr);
-extern void form_new_str(char *pStr, char ans[]);
+extern int file_input(double *x, double *eps, char *filename);
+extern void file_output(double res, double err, const char *result, const char *error, char *filename);
+extern void random_generation(double *x, double *eps);
+extern void power_series(double x, double eps, double *res, double *err);
 
-const int SIZEMAX = 100000;
-const int VALUEMAX = 128;
+double BERNOULLI[1000];
+const double MAX_EPS = 0.05;
 
 int main (int argc, char** argv) {
     char *arg;
     int option;
     struct timespec start, end;
     int64_t elapsed_ns;
-    char *str;
-    str = (char*)malloc(SIZEMAX);
+    char *fileInput = NULL, *fileOutput = NULL;
+    double x, eps;
+
     if (argc > 1) {
+        if (argc <= 2) {
+            fileInput = "input.txt";
+        } else {
+            fileInput = argv[2];
+        }
+        if (argc <= 3) {
+            fileOutput = "output.txt";
+        } else {
+            fileOutput = argv[3];
+        }
         arg = argv[1];
         printf("arg = %s\n", arg);
         option = atoi(arg);
         if (option == 1) {
-            fgets(str, SIZEMAX, stdin);
+            printf("Enter x:");
+            scanf("%lf", &x);
+            printf("Enter eps:");
+            scanf("%lf", &eps);
+            if (eps > MAX_EPS) {
+                printf("Epsilon is too big. Max epsilon = %lf\n", MAX_EPS);
+                return 1;
+            }
         } else if (option == 2) {
-            if (file_input(str, "input.txt")) {
+            int ret = file_input(&x, &eps, fileInput);
+            if (ret != 0) {
                 return 1;
             }
         } else {
-            random_generation(str);
+            random_generation(&x, &eps);
         }
     } else {
         printf("No arguments\n");
         return 0;
     }
-    printf("Input: %s\n", str);
+    printf("Input value: %lf, eps: %lf\n", x, eps);
     clock_gettime(CLOCK_MONOTONIC, &start);
-    char *pStr;
-    pStr = str;
-    char ans[100000] = "";
-    form_new_str(pStr, ans);
+
+    double res = 0.0, err = 0.0;
+    power_series(x, eps, &res, &err);
+
     clock_gettime(CLOCK_MONOTONIC, &end);
     elapsed_ns = timespec_difference(end, start);
     printf("Elapsed: %ld ns\n", elapsed_ns);
-    printf("Output: %s\n", ans);
-    file_output(ans, "output.txt");
+
+    const char *result = "Approximate Value: %lf\n";
+    const char *error = "Error: %lf\n";
+    printf(result, res);
+    printf(error, err);
+    file_output(res, err, result, error, fileOutput);
+
     return 0;
 }
+
 ```
 <br>
 
-file_input.c -- ввод данных из входного файла "input.txt"
+file_input.c -- ввод данных из входного файла
 ```c
 #include <stdio.h>
 
-int file_input(char *pStr,  char *filename) {
+extern const double MAX_EPS;
+
+int file_input(double *x, double *eps, char *filename) {
     FILE *file;
     if ((file = fopen(filename, "r")) == NULL) {
         printf("Unable to open file '%s'\n", filename);
         return 1;
     }
-    int ch;
-    do {
-        ch = fgetc(file);
-        *pStr = ch;
-        ++pStr;
-    } while(ch != -1);
-    *pStr = '\0';
+    if (fscanf(file, "%lf", x) < 1) {
+        printf ("Reading file '%s' error\n", filename);
+        fclose(file);
+        return 1;
+    }
+    if (fscanf(file, "%lf", eps) < 1) {
+        printf("Reading file '%s' error\n", filename);
+        fclose(file);
+        return 1;
+    }
+    if (*eps > MAX_EPS) {
+        printf("Epsilon is too big. Max epsilon = %lf\n", MAX_EPS);
+        fclose(file);
+        return 1;
+    }
     fclose(file);
     return 0;
 }
+
 ```
 <br>
 
-file_output.c -- вывод данных в выходной файл "output.txt"
+file_output.c -- вывод данных в выходной файл
 ```c
 #include <stdio.h>
 
-void file_output(char *pStr, char *filename) {
+void file_output(double res, double err, const char *result, const char *error, char *filename) {
     FILE *file;
     if ((file = fopen(filename, "w")) != NULL) {
-        while (*pStr) {
-            fprintf(file, "%c", *pStr);
-            ++pStr;
-        }
+        fprintf(file, result, res);
+        fprintf(file, error, err);
         fclose(file);
     }
 }
+
 ```
 <br>
 
 random_generation.c -- псевдослучайная генерация <br>
 ```c
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-extern const int SIZEMAX;
-extern const int VALUEMAX;
+extern const double MAX_EPS;
 
-void random_generation(char *pStr) {
-    srand(time(NULL));
-    int n = rand() % (SIZEMAX / 2);
-    
+void random_generation(double *x, double *eps) {
+    unsigned int seed = time(NULL);
+    srand(seed);
+    *x = ((double)rand()/(double)(RAND_MAX)) * M_PI / 2;
+    if (seed % 2 != 0) {
+        *x *= (-1);
+    }
+    *eps = ((double)rand()/(double)(RAND_MAX)) * MAX_EPS;
 }
+
 ```
 <br>
 
@@ -175,11 +214,63 @@ int64_t timespec_difference(struct timespec a, struct timespec b) {
     timeB += b.tv_nsec;
     return timeA - timeB;
 }
+
 ```
 <br>
 
-....c -- формирование новой строки согласно условию задачи
+power_series.c -- подсчёт результата двумя способами (формула из условия и расчёт через степенной ряд), вычисление погрешности
 ```c
+#include <math.h>
+
+extern double BERNOULLI[];
+
+long long factorial(int n) {
+    if (n == 0 || n == 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
+double th(int n, double x) {
+    double res = 0.0;
+    for (int i = 1; i <= n; ++i) {
+        res += pow(2, 2 * i) * (pow(2, 2 * i) - 1) * BERNOULLI[2 * i] * pow(x, 2 * i - 1) / factorial(2 * i);
+    }
+    return res;
+}
+
+double calculateTanh(double x) {
+    double tanh = (exp(x) - exp(-x)) / (exp(x) + exp(-x));
+    return tanh;
+}
+
+void power_series(double x, double eps, double *res, double *err) {
+    int n = 10;
+    BERNOULLI[0] = 1.0;
+    BERNOULLI[1] = -0.5;
+    for (int i = 2; i <= n; ++i) {
+        for (int j = 0; j <= i; ++j) {
+            for (int k = 0; k <= j; ++k) {
+                double ratio = factorial(j) / (factorial(j - k) * factorial(k));
+                if (i > 1 && i % 2 == 0) {
+                    BERNOULLI[i] += pow(-1, k) * ratio * pow(k, i) / (j + 1);
+                } else {
+                    BERNOULLI[i] = 0.0;
+                }
+            }
+        }
+    }
+    int a = 1;
+    double exact = calculateTanh(x);
+    do {
+        if (a >= 11) {
+            break;
+        }
+        *res = th(a, x);
+        *err = fabs(*res - exact);
+        ++a;
+    } while (*err > eps / 100);
+}
 
 ```
 <br>
