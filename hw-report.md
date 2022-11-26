@@ -279,7 +279,7 @@ ________________________
 
 ### 7. Тексты программы на языке ассемблера, разработанной вручную или полученной после компиляции и расширенной комментариями. <br> ###
 
-Можно посмотреть здесь: ACS-IHW-3/codes/edited-asm-code <br> [ACS-IHW-3/codes/edited-asm-code](https://github.com/kseniag03/ACS-IHW-3/tree/main/codes/edited-asm-code) <br>
+Можно посмотреть здесь: [ACS-IHW-3/codes/edited-asm-code](https://github.com/kseniag03/ACS-IHW-3/tree/main/codes/edited-asm-code) <br>
 
 [main](https://github.com/kseniag03/ACS-IHW-3/blob/main/codes/edited-asm-code/main.s) <br>
 [file_input](https://github.com/kseniag03/ACS-IHW-3/blob/main/codes/edited-asm-code/file_input.s) <br>
@@ -501,8 +501,8 @@ ________________________
 
 ### 8. Текст на ассемблере программы, полученный после компиляции программы на C. <br> ###
 
-Файлы расширения .s есть в папке: ACS-IHW-3/codes/time-size-check/compile-c <br>
-Без опций (-masm=intel и прочих): ACS-IHW-3/codes/time-size-check/compile-O0 <br>
+Файлы расширения .s есть в папке: [ACS-IHW-3/codes/time-size-check/compile-c](https://github.com/kseniag03/ACS-IHW-3/tree/main/codes/time-size-check/compile-c) <br>
+Без опций (-masm=intel и прочих): [ACS-IHW-3/codes/time-size-check/compile-O0](https://github.com/kseniag03/ACS-IHW-3/tree/main/codes/time-size-check/compile-O0) <br>
 
 ________________________
 
