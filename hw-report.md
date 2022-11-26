@@ -501,8 +501,8 @@ ________________________
 
 ### 8. Текст на ассемблере программы, полученный после компиляции программы на C. <br> ###
 
-Файлы расширения .s есть в папке: [ACS-IHW-3/codes/time-size-check/compile-c](https://github.com/kseniag03/ACS-IHW-3/tree/main/codes/time-size-check/compile-c) <br>
-Без опций (-masm=intel и прочих): [ACS-IHW-3/codes/time-size-check/compile-O0](https://github.com/kseniag03/ACS-IHW-3/tree/main/codes/time-size-check/compile-O0) <br>
+Файлы расширения .s есть в папке: [ACS-IHW-3/codes/time-size-check/compile-c](https://github.com/kseniag03/ACS-IHW-3/tree/main/codes/time-size-check/comp-c) <br>
+Без опций (-masm=intel и прочих): [ACS-IHW-3/codes/time-size-check/compile-O0](https://github.com/kseniag03/ACS-IHW-3/tree/main/codes/time-size-check/comp-O0) <br>
 
 ________________________
 
