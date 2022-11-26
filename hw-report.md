@@ -426,24 +426,17 @@ ________________________
 
 Компиляция частей кода и линковка: <br>
 
-`gcc -masm=intel \` <br>
-    `-fno-asynchronous-unwind-tables \` <br>
-    `-fno-jump-tables \` <br>
-    `-fno-stack-protector \` <br>
-    `-fno-exceptions \` <br>
-    `./main.c \` <br>
-    `-S -o ./main.s` <br>
-`gcc ./main.s -c -o ./main.o` <br>
+`gcc ./main.c -c -o ./main.o -save-temps` <br>
 
 Аналогичные команды выполнить для всех файлов-функций: <br>
 file_input.c <br>
 file_output.c <br>
-....c <br>
+power_series.c <br>
 random_generation.c <br>
 timespec_difference.c <br>
 
 Для линковки: <br>
-`gcc -lc main.o file_input.o file_output.o random_generation.o timespec_difference.o ....o -o a.exe` <br>
+`gcc -lc main.o file_input.o file_output.o random_generation.o timespec_difference.o power_series.o -o a.exe -lm` <br>
 
 Убираем макросы: <br>
 endbr64, cdqe, cdq (в random_generation его оставляем, чтобы корректно выполнялось деление), nop <br>
