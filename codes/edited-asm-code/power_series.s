@@ -50,7 +50,7 @@ th:
 	movsd	QWORD PTR -32[rbp], xmm0	# 1-й double аргумент ф-и — double x (в стеке на -32)
 	pxor	xmm0, xmm0			# ИСКЛЮЧАЮЩЕЕ ИЛИ над 64 битами (обнуление регистра)
 	movsd	QWORD PTR -8[rbp], xmm0		# в стеке на -8 записывается значение из xmm0 (double res = 0.0)
-	mov	DWORD PTR -12[rbp], 1		# в стеке на -12 записывается 1 (int i = 1) !!!!!!!
+	mov	DWORD PTR -12[rbp], 1		# в стеке на -12 записывается 1 (int i = 1)
 	jmp	.L6				# -> L6
 
 .L7:
@@ -200,15 +200,15 @@ power_series:
 	movsd	xmm0, QWORD PTR .LC4[rip]	# xmm0 = -0.5 (double const, вычисляется компилятором)
 	movsd	QWORD PTR BERNOULLI[rip+8], xmm0# BERNOULLI[1] = -0.5
 
-	mov	DWORD PTR -20[rbp], 2		# стек -20: 2 (int i = 2) !!!!!!!!!
+	mov	DWORD PTR -20[rbp], 2		# стек -20: 2 (int i = 2)
 	jmp	.L12				# -> L12
 
 .L19:
-	mov	DWORD PTR -24[rbp], 0		# стек -24: 0 (int j = 0) !!!!!!!!!
+	mov	DWORD PTR -24[rbp], 0		# стек -24: 0 (int j = 0)
 	jmp	.L13				# -> L13
 
 .L18:
-	mov	DWORD PTR -28[rbp], 0		# стек -28: 0 (int k = 0) !!!!!!!!!
+	mov	DWORD PTR -28[rbp], 0		# стек -28: 0 (int k = 0)
 	jmp	.L14				# -> L14
 
 .L17:
