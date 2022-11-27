@@ -5,9 +5,12 @@
 
 extern const double MAX_EPS;
 
+const double randmax = RAND_MAX;
+
 void random_generation(double *x, double *eps) {
     unsigned int seed = time(NULL);
     srand(seed);
+    int d = RAND_MAX;
     *x = ((double)rand()/(double)(RAND_MAX)) * M_PI / 2;
     if (seed % 2 != 0) {
         *x *= (-1);
