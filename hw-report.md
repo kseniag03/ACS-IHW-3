@@ -31,15 +31,13 @@ ________________________
 Тесты можно посмотреть здесь: [ACS-IHW-3/tests](https://github.com/kseniag03/ACS-IHW-3/tree/main/tests) <br>
 
 Ввод с консоли: <br>
- <br>
+![program-test-console](https://user-images.githubusercontent.com/114473740/204147567-ab31b49c-7093-4f5e-9531-4d7ef22b3ecf.png) <br>
 
 Ввод из файла: <br>
- <br>
- <br>
+![program-test-file](https://user-images.githubusercontent.com/114473740/204146444-2e3c6cb7-464a-471a-a979-10bfbb7a45c4.png) <br>
 
 Генератор: <br>
- <br>
- <br>
+![program-test-generate](https://user-images.githubusercontent.com/114473740/204148476-a213783a-f07d-4e74-92e3-8989e88527ac.png) <br>
 ________________________
 
 ### 6. Исходные тексты программы на языке C. <br> ###
