@@ -432,7 +432,106 @@ main:
 file_input.s
 
 ```assembly
+.intel_syntax noprefix
+.globl file_input
+.type file_input, @function
 
+.section .data
+	readFile:	.string		"r"
+	notOpenFile:	.string		"Unable to open file '%s'\n"
+	doubleFormat:	.string		"%lf"
+	readingError:	.string		"Reading file '%s' error\n"
+	tooBigEps:	.string		"Epsilon is too big. Max epsilon = %lf\n"
+
+.text
+
+file_input:
+	push	rbp
+	mov	rbp, rsp
+
+	mov	r13, rdi			# x (1-й аргумент ф-и), записываем в свободный регистр r13
+	mov	r14, rsi			# eps (2-й аргумент ф-и), записываем в свободный регистр r14
+	mov	r15, rdx			# filename (3-й аргумент ф-и), записываем в свободный регистр r15
+
+	lea	rsi, readFile[rip]		# 2-й аргумент -- "r"
+	mov	rdi, r15			# 1-й аргумент -- filename
+	call	fopen@PLT			# fopen(filename, "r")
+
+	mov	r12, rax			# r12 (file) = rax = fopen(filename, "r") (возвращаемое значение ф-и)
+	cmp	r12, 0				# сравнение file с 0 (NULL)
+	jne	.L2				# if file != NULL -> L2
+
+	mov	rsi, r15			# 2-й аргумент -- filename
+	lea	rdi, notOpenFile[rip]		# 1-й аргумент -- "Unable to open file '%s'\n"
+	call	printf@PLT			# printf("Unable to open file '%s'\n", filename)
+
+	mov	eax, 1				# return 1
+	jmp	.EXIT				# -> EXIT
+
+.L2:
+	mov	rdx, r13			# 3-й аргумент -- x
+	lea	rsi, doubleFormat[rip]		# 2-й аргумент -- "%lf"
+	mov	rdi, r12			# 1-й аргумент -- file
+	call	__isoc99_fscanf@PLT		# fscanf(file, "%lf", x)
+
+	test	eax, eax			# сравнение результата fscanf(file, "%lf", x) с 0
+	jg	.L4				# if fscanf(file, "%lf", x) > 0 -> L4
+
+	mov	rsi, r15			# 2-й аргумент -- filename
+	lea	rdi, readingError[rip]		# 1-й аргумент -- "Reading file '%s' error\n"
+	call	printf@PLT			# printf ("Reading file '%s' error\n", filename)
+
+	mov	rdi, r12			# 1-й аргумент -- file
+	call	fclose@PLT			# fclose(file)
+
+	mov	eax, 1				# return 1
+	jmp	.EXIT				# -> EXIT
+
+.L4:
+	mov	rdx, r14			# 3-й аргумент -- eps
+	lea	rsi, doubleFormat[rip]		# 2-й аргумент -- "%lf"
+	mov	rdi, r12			# 1-й аргумент -- file
+	call	__isoc99_fscanf@PLT		# fscanf(file, "%lf", eps)
+
+	test	eax, eax			# сравнение результата fscanf(file, "%lf", x) с 0
+	jg	.L5				# if fscanf(file, "%lf", x) > 0 -> L5
+
+	mov	rsi, r15			# 2-й аргумент -- filename
+	lea	rdi, readingError[rip]		# 1-й аргумент -- "Reading file '%s' error\n"
+	call	printf@PLT			# printf ("Reading file '%s' error\n", filename)
+
+	mov	rdi, r12			# 1-й аргумент -- file
+	call	fclose@PLT			# fclose(file)
+
+	mov	eax, 1				# return 1
+	jmp	.EXIT				# -> EXIT
+
+.L5:
+	mov	rax, r14			# rax = x
+	movsd	xmm0, QWORD PTR [rax]		# копируем значение double из *eps в xmm0
+	movsd	xmm1, MAX_EPS[rip]		# копируем значение double из MAX_EPS в xmm1
+	comisd	xmm0, xmm1			# сравниваем *eps и MAX_EPS
+	jbe	.L9				# if eps <= MAX_EPS -> L9
+
+	movq	xmm0, MAX_EPS[rip]		# 1-й double-аргумент (MAX_EPS)
+	lea	rdi, tooBigEps[rip]		# 1-й не-double аргумент -- "Epsilon is too big. Max epsilon = %lf\n"
+	call	printf@PLT			# printf("Epsilon is too big. Max epsilon = %lf\n", MAX_EPS)
+
+	mov	rdi, r12			# 1-й аргумент -- file
+	call	fclose@PLT			# fclose(file)
+
+	mov	eax, 1				# return 1
+	jmp	.EXIT				# -> EXIT
+
+.L9:
+	mov	rdi, r12			# 1-й аргумент -- file
+	call	fclose@PLT			# fclose(file)
+
+	mov	eax, 0				# return 0
+
+.EXIT:
+	leave
+	ret
 
 ```
 <br>
@@ -503,7 +602,76 @@ file_output:
 random_generation.s
 
 ```assembly
+.intel_syntax noprefix
+.globl random_generation
+.type random_generation, @function
 
+.section .data
+	RANDMAX:	.double		2147483647
+	M_PI:		.double		3.141593
+	HALF:		.double		2
+	SIGNCHANGE:	.double		-1
+
+.text
+
+random_generation:
+	push	rbp
+	mov	rbp, rsp
+
+	mov	r12, rdi			# *x (1-й аргумент ф-и), записываем в свободный регистр r12
+	mov	r13, rsi			# *eps (2-й аргумент ф-и), записываем в свободный регистр r13
+	mov	edi, 0				# 1-й аргумент -- 0 (NULL)
+	call	time@PLT			# time(NULL)			
+
+	mov	r14d, eax			# seed = time(NULL), записываем в свободный регистр r14d
+	mov	edi, r14d			# 1-й аргумент -- r14d (seed)
+	call	srand@PLT			# srand(seed)
+
+	call	rand@PLT			# rand()
+
+	pxor	xmm0, xmm0			# ИСКЛЮЧАЮЩЕЕ ИЛИ над 64 битами
+
+	cvtsi2sd	xmm0, eax		# сконвертировать doubleword eax (rand()) в значение типа double (число с плавающей точкой), т.е. xmm0 = (double)rand()
+	movsd	xmm2, RANDMAX[rip]		# xmm2 = RAND_MAX
+	movapd	xmm1, xmm0			# xmm1 = xmm0 = (double)rand() (перемещение значений с плавающей точкой)
+	divsd	xmm1, xmm2			# xmm1 = (double)rand() / RAND_MAX
+	movsd	xmm0, M_PI[rip]			# xmm0 = M_PI
+	mulsd	xmm0, xmm1			# xmm0 = xmm0 * xmm1 = M_PI * ((double)rand()/RAND_MAX)
+	movsd	xmm1, HALF[rip]			# xmm1 = 2
+	divsd	xmm0, xmm1			# xmm0 = xmm0 / xmm1 = M_PI * ((double)rand()/RAND_MAX) / 2
+
+	mov	rax, r12			# rax = r12 = x
+	movsd	QWORD PTR [rax], xmm0		# *x = xmm0 = M_PI * ((double)rand()/RAND_MAX) / 2
+
+	mov	eax, r14d			# eax = r14d = seed
+	and	eax, 1				# seed & 1
+	test	eax, eax			# if eax % 2 == 0 (проверка последнего бита на равенство единице) 
+	je	.EPS				# if seed % 2 == 0 -> EPS
+
+	mov	rax, r12			# rax = x
+	movsd	xmm0, QWORD PTR [rax]		# xmm0 = *x
+	movq	xmm1, SIGNCHANGE[rip]		# xmm1 = -1
+
+	mov	rax, r12			# rax = x
+	movsd	QWORD PTR [rax], xmm0		# *x = xmm0 = (-1) * M_PI * ((double)rand()/RAND_MAX) / 2
+
+.EPS:
+	call	rand@PLT			# rand()
+
+	pxor	xmm0, xmm0			# ИСКЛЮЧАЮЩЕЕ ИЛИ над 64 битами
+
+	cvtsi2sd	xmm0, eax		# xmm0 = (double)rand()
+	movsd	xmm2, RANDMAX[rip]		# xmm2 = RAND_MAX
+	movapd	xmm1, xmm0			# xmm1 = xmm0 = (double)rand()
+	divsd	xmm1, xmm2			# xmm1 = (double)rand() / RAND_MAX
+	movsd	xmm0, MAX_EPS[rip]		# xmm0 = MAX_EPS = 0.05
+	mulsd	xmm0, xmm1			# xmm0 = xmm0 * xmm1 = 0.05 * (double)rand() / RAND_MAX
+
+	mov	rax, r13			# rax = r13 = eps
+	movsd	QWORD PTR [rax], xmm0		# *eps = 0.05 * (double)rand() / RAND_MAX (точность от 0 до 0.05)
+
+	leave
+	ret
 
 ```
 
@@ -512,31 +680,31 @@ random_generation.s
 timespec_difference.s
 
 ```assembly
-.intel_syntax noprefix
-.globl	timespec_difference
-.type	timespec_difference, @function
+.intel_syntax noprefix			# intel-синтаксис
+.globl	timespec_difference		# точка запуска timespec_difference
+.type	timespec_difference, @function	# объявление timespec_difference как функции
 
-.text
+.text					# секция кода
 
 timespec_difference:
-	push	rbp				# сохраняем rbp на стек
-	mov	rbp, rsp			# присваиваем rbp = rsp
+	push	rbp			# сохраняем rbp на стек
+	mov	rbp, rsp		# присваиваем rbp = rsp
 
-	mov	r12, rdi			# 1-й аргумент timespec_diff — struct timespec a.tv_sec (в свободном регистре r12)
-	mov	r13, rsi			# 2-й аргумент timespec_diff — struct timespec a.tv_nsec (в свободном регистре r13)
-	mov	r14, rdx			# 3-й аргумент timespec_diff — struct timespec b.tv_sec (в свободном регистре r14)
-	mov	r15, rcx			# 4-й аргумент timespec_diff — struct timespec b.tv_nsec (в свободном регистре r15)
+	mov	r12, rdi		# 1-й аргумент timespec_diff — struct timespec a.tv_sec (в свободном регистре r12)
+	mov	r13, rsi		# 2-й аргумент timespec_diff — struct timespec a.tv_nsec (в свободном регистре r13)
+	mov	r14, rdx		# 3-й аргумент timespec_diff — struct timespec b.tv_sec (в свободном регистре r14)
+	mov	r15, rcx		# 4-й аргумент timespec_diff — struct timespec b.tv_nsec (в свободном регистре r15)
 
-	imul	rax, r12, 1000000000		# rax = a.tv_sec * 1000000000 (rax - возвращаемое значение)
-	add	rax, r13			# rax = a.tv_sec * 1000000000 + a.tv_nsec
+	imul	rax, r12, 1000000000	# rax = a.tv_sec * 1000000000 (rax - возвращаемое значение)
+	add	rax, r13		# rax = a.tv_sec * 1000000000 + a.tv_nsec
 	
-	imul	r11, r14, 1000000000		# r11 = b.tv_sec * 1000000000 (r11 - свободный регистр)
-	add	r11, r15			# r11 = b.tv_sec * 1000000000 + b.tv_nsec
+	imul	r11, r14, 1000000000	# r11 = b.tv_sec * 1000000000 (r11 - свободный регистр)
+	add	r11, r15		# r11 = b.tv_sec * 1000000000 + b.tv_nsec
 
-	sub	rax, r11			# вычитаем время начала: rax = (a.tv_sec * 1000000000 + a.tv_nsec) - (b.tv_sec * 1000000000 + b.tv_nsec)
+	sub	rax, r11		# вычитаем время начала: rax = (a.tv_sec * 1000000000 + a.tv_nsec) - (b.tv_sec * 1000000000 + b.tv_nsec)
 	
-	pop rbp			  		# очистка стека
-	ret					# выполняется выход из программы
+	pop rbp				# очистка стека
+	ret				# выполняется выход из программы
 
 ```
 
