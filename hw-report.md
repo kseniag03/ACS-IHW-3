@@ -291,6 +291,7 @@ ________________________
 main.s
 
 ```assembly
+
 .intel_syntax noprefix				# intel-синтаксис
 .globl main					# точка запуска main
 .type main, @function				# объявление main как функции
@@ -328,8 +329,6 @@ main:
 	mov	DWORD PTR -132[rbp], edi	# 1-й аргумент main — argc (в стеке на -132)
 	mov	QWORD PTR -144[rbp], rsi	# 2-й аргумент main — argv (в стеке на -144)
 
-	mov	r12, 0				# char *fileInput = NULL, локальную переменную записываем в свободный регистр r12
-	mov	r13, 0				# char *fileOutput = NULL, локальную переменную записываем в свободный регистр r13
 	cmp	DWORD PTR -132[rbp], 1		# сравнение argc с 1
 	jle	.L2				# if argc <= 1 -> L2
 
@@ -337,26 +336,26 @@ main:
 	jg	.L3				# if argc > 2 -> L3
 
 	lea	rax, inputFileName[rip]		# rax = "input.txt"
-	mov	r12, rax			# fileInput = "input.txt"
+	mov	QWORD PTR -8[rbp], rax		# fileInput = "input.txt"
 	jmp	.L4				# -> L4
 
 .L3:
 	mov	rax, QWORD PTR -144[rbp]	# rax = argv
 	mov	rax, QWORD PTR 16[rax]		# rax = argv[2]
-	mov	r12, rax			# fileInput = argv[2]
+	mov	QWORD PTR -8[rbp], rax		# fileInput = argv[2]
 
 .L4:
 	cmp	DWORD PTR -132[rbp], 3		# сравнение argc с 3
 	jg	.L5				# if argc > 3 -> L5
 
 	lea	rax, outputFileName[rip]	# rax = "output.txt"
-	mov	r13, rax			# fileOutput = "output.txt"
+	mov	QWORD PTR -16[rbp], rax		# fileOutput = "output.txt"
 	jmp	.L6				# -> L6
 
 .L5:
 	mov	rax, QWORD PTR -144[rbp]	# rax = argv
 	mov	rax, QWORD PTR 24[rax]		# rax = argv[3]
-	mov	r13, rax			# fileOutput = argv[3]
+	mov	QWORD PTR -16[rbp], rax		# fileOutput = argv[3]
 
 .L6:
 	mov	rax, QWORD PTR -144[rbp]	# rax = argv
@@ -405,7 +404,7 @@ main:
 	cmp	r14d, 2				# сравнение option с 2
 	jne	.L11				# if option != 2 -> L11
 
-	mov	rdx, r12			# 3-й аргумент -- fileInput
+	mov	rdx, QWORD PTR -8[rbp]		# 3-й аргумент -- fileInput
 	lea	rsi, -112[rbp]			# 2-й аргумент -- &eps
 	lea	rdi, -104[rbp]			# 1-й аргумент -- &x
 	call	file_input@PLT			# file_input(&x, &eps, fileInput)
@@ -494,9 +493,11 @@ main:
 
 	movsd	xmm0, QWORD PTR -128[rbp]	# xmm0 = err
 	mov	rax, QWORD PTR -120[rbp]	# rax = res
-	mov	rdx, r13			# 3-й не-double аргумент -- rdx = fileOutput
+
+	mov	rdx, QWORD PTR -16[rbp]		# 3-й не-double аргумент -- rdx = fileOutput
 	mov	rsi, QWORD PTR -56[rbp]		# 2-й не-double аргумент -- rsi = *error
 	mov	rcx, QWORD PTR -48[rbp]		# rcx = *result
+
 	mov	rdi, rcx			# 1-й не-double аргумент -- rdi = rcx = *result
 	movapd	xmm1, xmm0			# 2-й double аргумент -- xmm1 = xmm0 = err
 	movq	xmm0, rax			# 1-й double аргумент -- xmm0 = rax = res
